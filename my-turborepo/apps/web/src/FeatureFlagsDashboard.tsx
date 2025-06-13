@@ -2,6 +2,76 @@
 import { trpc } from "./trpc";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import styled from "@emotion/styled";
+
+const FlagCard = styled.li`
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  list-style: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+`;
+
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+`;
+
+const PageWrapper = styled.div`
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const Title = styled.h2`
+  margin-bottom: 1.5rem;
+`;
+
+const Input = styled.input`
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin: 0.25rem 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
+
+const Label = styled.label`
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const Button = styled.button`
+  padding: 0.5rem 1rem;
+  background: #007aff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+
+  &:hover {
+    background: #005dd1;
+  }
+`;
+
+const FlagHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const FlagMeta = styled.p`
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #555;
+`;
 
 export function FeatureFlagsDashboard() {
   const utils = trpc.useUtils();
@@ -49,98 +119,91 @@ export function FeatureFlagsDashboard() {
   if (isLoading) return <p>Chargement des flags...</p>;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h2>Feature Flags</h2>
+    <PageWrapper>
+      <Title>Feature Flags</Title>
 
       {/* Liste */}
       <ul>
         {flags?.map((flag) => (
-          <li key={flag.id}>
+          <FlagCard key={flag.id}>
             {editingFlagId === flag.id ? (
-              // Formulaire d'édition
-              <div>
-                <input
+              <>
+                <Input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   placeholder="Nom"
                 />
-                <input
+                <Input
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="Description"
                 />
-                <label>
+                <Label>
                   <input
                     type="checkbox"
                     checked={editEnabled}
                     onChange={(e) => setEditEnabled(e.target.checked)}
                   />
                   Activé
-                </label>
-                <button
-                  onClick={() => {
-                    updateFlag.mutate({
-                      id: flag.id,
-                      name: editName,
-                      description: editDescription,
-                      enabled: editEnabled,
-                    });
-                    setEditingFlagId(null);
-                  }}
-                >
-                  Enregistrer
-                </button>
-                <button onClick={() => setEditingFlagId(null)}>Annuler</button>
-              </div>
+                </Label>
+                <ButtonRow>
+                  <Button
+                    onClick={() => {
+                      updateFlag.mutate({
+                        id: flag.id,
+                        name: editName,
+                        description: editDescription,
+                        enabled: editEnabled,
+                      });
+                      setEditingFlagId(null);
+                    }}
+                  >
+                    Enregistrer
+                  </Button>
+                  <Button onClick={() => setEditingFlagId(null)}>
+                    Annuler
+                  </Button>
+                </ButtonRow>
+              </>
             ) : (
-              // Affichage normal
-              <div>
-                <strong>{flag.name}</strong> — {flag.description} —{" "}
-                {flag.enabled ? "✅ Activé" : "❌ Désactivé"}
-                <Link to={`/flags/${flag.id}/edit`}>Modifier</Link>
-                <button
-                  onClick={() => {
-                    const confirmed = window.confirm(
-                      `Confirmer la suppression du flag "${flag.name}" ?`
-                    );
-                    if (confirmed) {
-                      deleteFlag.mutate({ id: flag.id });
-                    }
-                  }}
-                >
-                  Supprimer
-                </button>
-              </div>
+              <>
+                <FlagHeader>
+                  <strong>{flag.name}</strong>
+                  <span>{flag.enabled ? "✅ Activé" : "❌ Désactivé"}</span>
+                </FlagHeader>
+                <FlagMeta>{flag.description}</FlagMeta>
+                <ButtonRow>
+                  <Link to={`/flags/${flag.id}/edit`}>Modifier</Link>
+                  <Button
+                    onClick={() => {
+                      const confirmed = window.confirm(
+                        `Confirmer la suppression du flag "${flag.name}" ?`
+                      );
+                      if (confirmed) deleteFlag.mutate({ id: flag.id });
+                    }}
+                  >
+                    Supprimer
+                  </Button>
+                </ButtonRow>
+              </>
             )}
-          </li>
+          </FlagCard>
         ))}
       </ul>
 
-      <button
-        onClick={() => {
-          createFlag.mutate({
-            name: "Test via bouton",
-            description: "Depuis le bouton",
-            enabled: false,
-          });
-        }}
-      >
-        Créer un flag test
-      </button>
-
       {/* Formulaire de création */}
-      <h3>Créer un nouveau flag</h3>
-      <input
+      <Title>Créer un nouveau flag</Title>
+      <Input
         placeholder="Nom"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <input
+      <Input
         placeholder="Description"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      <button onClick={handleCreate}>Créer</button>
-    </div>
+      <Button onClick={handleCreate}>Créer</Button>
+    </PageWrapper>
   );
 }
