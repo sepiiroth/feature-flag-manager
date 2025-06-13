@@ -19,6 +19,7 @@ export const appRouter = t.router({
       })
     )
     .mutation(({ input }) => {
+      console.log("📩 Flag reçu côté serveur :", input);
       const newFlag = {
         id: crypto.randomUUID(),
         name: input.name,

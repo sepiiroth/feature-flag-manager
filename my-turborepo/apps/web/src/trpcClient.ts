@@ -1,6 +1,6 @@
 // apps/web/src/trpcClient.ts
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import type { AppRouter } from "@my-turborepo/api";
+import type { AppRouter } from "../../../packages/api";
 
 export const client = createTRPCProxyClient<AppRouter>({
   links: [
