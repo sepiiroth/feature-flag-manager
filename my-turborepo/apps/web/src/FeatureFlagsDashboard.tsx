@@ -1,6 +1,7 @@
 // apps/web/src/FeatureFlagsDashboard.tsx
 import { trpc } from "./trpc";
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 export function FeatureFlagsDashboard() {
   const utils = trpc.useUtils();
@@ -96,17 +97,17 @@ export function FeatureFlagsDashboard() {
               <div>
                 <strong>{flag.name}</strong> — {flag.description} —{" "}
                 {flag.enabled ? "✅ Activé" : "❌ Désactivé"}
+                <Link to={`/flags/${flag.id}/edit`}>Modifier</Link>
                 <button
                   onClick={() => {
-                    setEditingFlagId(flag.id);
-                    setEditName(flag.name);
-                    setEditDescription(flag.description || "");
-                    setEditEnabled(flag.enabled);
+                    const confirmed = window.confirm(
+                      `Confirmer la suppression du flag "${flag.name}" ?`
+                    );
+                    if (confirmed) {
+                      deleteFlag.mutate({ id: flag.id });
+                    }
                   }}
                 >
-                  Modifier
-                </button>
-                <button onClick={() => deleteFlag.mutate({ id: flag.id })}>
                   Supprimer
                 </button>
               </div>
